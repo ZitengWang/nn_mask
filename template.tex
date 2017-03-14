@@ -3,19 +3,19 @@
 \usepackage{INTERSPEECH_v2}
 \usepackage{multirow}
 
-\title{Deep Neural Network Architectures for Double Talk Detection \\}
-\name{Ziteng Wang$^1$, Co-author Name$^2$}
+\title{Deep Neural Network Architectures for Double Talk Detection in AEC\\}
+\name{Ziteng Wang$^1$, Emmanuel Vincent$^{2}$, Xiaofei Wang$^1$, Yonghong Yan$^1$}
 \address{
   $^1$Institute of Acoustics, University of Chinese Academy of Sciences, China\\
-  $^2$INRIA Nancy, France}
-\email{zwang@loria.fr, coauthor@company.com}
+  $^2$INRIA Nancy, France }
+\email{wangziteng@hccl.ioa.ac.cn}
 
 \begin{document}
 
 \maketitle
 %
 \begin{abstract}
-  In Acoustic Echo Cancellation (AEC), the adaptive filter diverges from its optimum solution when double talk occurs. In this paper, the problem of Double Talk Detection (DTD) is addressed from a machine learning perspective. The Deep Neural Network (DNN) is introduced as a binary classifier, which is trained on spectral features of the far-end speech and the microphone signal. To further make use of the available data, a separate network is proposed to learn the echo path effect. The network, which maps the far-end speech to its echo image, actually collaborates with the classifier. Experiments are conducted to show its performance and the robustness to environment changes is analyzed.
+  In Acoustic Echo Cancellation (AEC), the adaptive filter diverges from its optimum solution when double talk occurs. In this paper, the problem of Double Talk Detection (DTD) is addressed from a machine learning perspective. The Deep Neural Network (DNN) is introduced as a binary classifier, which is trained on spectral features of the far-end speech and the microphone signal. To further make use of the available data, a separate network is proposed to learn the echo path effect. The network, which maps the far-end speech to its echo image, actually collaborates with the classifier. Experiments are conducted to demonstrate its performance and the robustness to environment changes is analyzed.
 \end{abstract}
 \noindent\textbf{Index Terms}: double talk detection, deep neural network, echo path, acoustic echo cancellation
 
@@ -23,10 +23,11 @@
 
 In a full-duplex system as illustrated in Fig.1, Acoustic Echo Cancellation (AEC) is an indispensable module which is used to suppress the undesirable echo of the far-end speech. An adaptive filter is designed to identify the echo path and then the echo component is subtracted from the microphone signal. If both the far-end speaker and the near-end speaker talk simultaneously, the so-called double talk occurs. The near-end speech acts as uncorrelated noise to the adaptive algorithm and diverges the filter from its optimum solution. Therefore Double Talk Detection (DTD) is introduced to control the updating of the adaptive filter. When double talk is detected, the filter update is slowed down or completely halted~\cite{benesty2011double}.
 
-% heuristic
-The solution to the DTD problem is a robust discriminator. The discriminator should achieve a high detection accuracy while keeping a low level of false alarm probability, regardless of the ambient noise and the changes in the echo path. In literatures, the common routine is to design a feature or detection statistic from the available signals. By comparing its value to a heuristic threshold, a binary decision is made: double talk or no double talk. The classical Geigel algorithm~\cite{duttweiler1978twelve} is based on an energy feature, which just involves the magnitudes of the recent past samples of the far-end speech. A generalized approach based on the Holder inequality is proposed in~\cite{paleologu2011class}, which takes the effect of noise into consideration. In~\cite{hamidia2014double}, a feature set is designed which includes the standard deviation and the log-energy of the signals. A large family of methods are based on the cross-correlation~\cite{ye1991new,schuldt2012delay,cho1999objective,benesty2000new,iqbal2007normalized} and the coherence~\cite{gansler1996double,tashev2012coherence}. The correlation statistic is usually calculated between the residual echo signal and the microphone signal~\cite{ye1991new}. However, it is shown vulnerable to the near-end disturbance and a time delay is introduced to improve the performance~\cite{schuldt2012delay}. Another option is the cross correlation between the far-end signal and the microphone signal~\cite{cho1999objective}. The Normalized Cross-Correlation (NCC) methods are discussed in~\cite{benesty2000new,iqbal2007normalized}. There are also other methods based on the signal envelop~\cite{szwoch2008low} and the zero-crossing rate~\cite{ikram2015double}, which are intended for the cases of low computational capacity.
 
-The methods above generally exploit no prior information of the acoustic environment. While in many scenarios such as in a conference room, the positions of the loudspeaker and the microphone are fixed over time, the acoustic properties of the environment can then help the detection of a double talk instance. In~\cite{jung2005new}, the double talk decision is made with the estimated echo path. A known loudspeaker impulse response is assumed and utilized in~\cite{ahgren2005acoustic}. Besides, the fact that data samples can be easily obtained in these scenarios motivates data-driven methods. A learning based approach is proposed in~\cite{iqbal2006doubletalk}, which employs a one recurrent layer network. The GMM model is considered in~\cite{lee2010frequency} along with frequency domain features. Notably, the idea of deep learning already achieves success in many applications, such as in a similar task of Voice Activity Detection (VAD)~\cite{zhang2013deep,wang2015universal}, though VAD is designed to distinguish between speech and noise periods. One AEC related work is the residual echo suppression with Deep Neural Network (DNN) in~\cite{lee2015dnn}.
+%~\cite{ye1991new,schuldt2012delay,cho1999objective,benesty2000new,iqbal2007normalized,gansler2006fast}
+The solution to the DTD problem is a robust discriminator. The discriminator should achieve a high detection accuracy while keeping a low level of false alarm probability, regardless of the ambient noise and the changes in the echo path. In literatures, the common routine is to design a feature or detection statistic from the available signals. By comparing its value to a heuristic threshold, a binary decision is made: double talk or no double talk. The classical Geigel algorithm~\cite{duttweiler1978twelve} is based on an energy feature, which just involves the magnitudes of the recent past samples of the far-end speech. A generalized approach based on the Holder inequality is proposed in~\cite{paleologu2011class}, which takes the effect of noise into consideration. In~\cite{hamidia2014double}, a feature set is designed which includes the standard deviation and the log-energy of the signals. A large family of methods are based on the cross-correlation~\cite{ye1991new,schuldt2012delay,cho1999objective,benesty2000new,iqbal2007normalized,gansler2006fast} and the coherence~\cite{gansler1996double,tashev2012coherence}. The correlation statistic is usually calculated between the residual echo signal and the microphone signal~\cite{ye1991new}. However, it is shown vulnerable to the near-end disturbance and a time delay is introduced to improve the performance~\cite{schuldt2012delay}. Another option is the cross correlation between the far-end signal and the microphone signal~\cite{cho1999objective}. The Normalized Cross-Correlation (NCC) methods are discussed in~\cite{benesty2000new,iqbal2007normalized}. There are also other methods based on the signal envelop~\cite{szwoch2008low} and the zero-crossing rate~\cite{ikram2015double}, which are intended for the cases of low computational capacity.
+
+The methods above generally exploit no prior information of the acoustic environment. While in many scenarios such as in a conference room, the positions of the loudspeaker and the microphone are fixed over time, the acoustic properties of the environment can then help the detection of a double talk instance. In~\cite{jung2005new}, the double talk decision is made with the estimated echo path. A known loudspeaker impulse response is assumed and utilized in~\cite{ahgren2005acoustic}. Besides, the fact that data samples can be easily obtained in these scenarios motivates data-driven methods. A learning based approach is proposed in~\cite{iqbal2006doubletalk}, which employs a one recurrent layer network. The GMM model is considered in~\cite{lee2010frequency} along with frequency domain features. Notably, the idea of deep learning already achieves success in many applications, such as in a similar task of Voice Activity Detection (VAD)~\cite{zhang2013deep,wang2015universal}, though VAD is designed to distinguish between speech and noise periods. One AEC related work is the residual echo suppression with Deep Neural Network (DNN) in~\cite{lee2015dnn}. DNN shows better modeling ability and it is advantageous in dealing with the potential non-linearity.
 
 \begin{figure}[t]
   \centering
@@ -37,14 +38,15 @@ The methods above generally exploit no prior information of the acoustic environ
 
 In this paper, we apply the deep learning methodology to the DTD problem. The problem can be easily formulated as a binary classification task, for which DNN is introduced as a discriminative classifier. The available training samples can be further utilized by a separate network, which is proposed to learn the echo path effect. The far-end speech is mapped to its echo images. This network indeed collaborates with the classifier and benefits the performance. Especially, its functionality is different from the common practice of cancelling the echo effect as the network in~\cite{lee2015dnn}. And such a network is shown not proper for the task. Simulations are performed in the experiments and the behaviour of these networks is analyzed.
 
-The outline of this paper is as follows. In section 2, the problem of DTD is defined. Section 3 introduces the proposed DNN based classifiers. The evaluation results are given in section 4 and conclusions are drawn in section 5.
-
 \begin{figure*}[t]
   \centering
   \includegraphics[width=0.9\linewidth]{fig2_nn.pdf}
   \caption{The proposed DNN architectures: (a) the binary classifier (b) the classifier with an echo learning net (c) the classifier with an echo suppression net.$F_x,F_d,F_y$ are respectively the feature vectors of the far-end signal, the microphone signal and the echo.}
   \label{fig2}
 \end{figure*}
+
+The outline of this paper is as follows. In section 2, the problem of DTD is defined. Section 3 introduces the proposed DNN based classifiers. The evaluation results are given in section 4 and conclusions are drawn in section 5.
+
 
 \section{Double talk detection}
 
@@ -137,7 +139,7 @@ where
 \begin{equation}\label{eq:loudnl}
   b=1.5 \cdot x(t)-0.3 \cdot x^2(t)
 \end{equation}
-and the slop variable $a$ is set 2 for $x>0$ and 1 for $x<0$. 
+and the slop variable $a$ is set 2 for $x>0$ and 1 for $x<0$.
 
 The training and testing data is separately drawn from the train set and the test set. There are 2000 sentences for class $H_0$ and 800 sentences for $H_1$ since double talk instances are less frequent than no double talk instances. 160 sentences for each class are used as the development set. White Gaussian noise is added to the echo signal at Signal-to-Noise Ratio (SNR) of 30 dB. In the double talk case, the Near-end-to-Echo Ratio (NER) is set 0 dB. 100 sentences for each class are chosen for the final performance evaluation.
 
@@ -176,7 +178,7 @@ To support the arguments in subsection 3.3, the performance of the classifiers i
 Note that the networks are trained in one single condition, they are tested for their generalization ability. The environment robustness test covers the near-end speech level, the ambient noise level and the variations in the echo path. The NER is changed from 0 dB to \{10, 5, -5\} dB, and the SNR is changed from 30 dB to \{35, 25, 20\} dB. The echo path variations are simulated by slightly changing both the position of the loudspeaker and the Reverberation Time (RT). The results of detection accuracy under a maximum false alarm rate 0.10 are given in Table~\ref{tab1}.
 
 \begin{table}[th]
-  \caption{The detection performance in changed environments under $P_f=0.1$.}
+  \caption{The detection performance in changed environments under $P_f=0.1$. The last row is tested with a different echo learning net.}
   \label{tab1}
   \centering
   \begin{tabular}{ r|c|c|c }
@@ -191,11 +193,14 @@ Note that the networks are trained in one single condition, they are tested for 
         $20$ dB    & $72.8$  & $72.6$   & $71.6$        \\  \hline
    RT~~~$200$ ms   & $80.9$  & $79.7$   & $78.9$      \\
         $250$ ms   & $77.4$  & $76.3$   & $75.2$      \\
+        $^*250$ ms   & $78.8$  & $79.4$   & $76.5$      \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Seen from the results, the trained networks favor easier tasks as indicated by high NER and high SNR. Overall, the Bnet stays ahead in performance. By increasing the near-end speech power just 5 dB higher than the echo, double talk is more accurately detected with about 10 percent improvements. However, the networks are also badly affected by low near-end speech power. Similar trends are observed in relative to SNR, though the fluctuations are smaller. In the RT test, it is found that the networks are tolerable to small changes in the echo path. When the changes become bigger, the mismatch in the echo learning network and the classifier begins to add, which lowers the accuracies.
+Seen from the results, the trained networks favor easier tasks as indicated by high NER and high SNR. Overall, the Bnet stays ahead in performance. By increasing the near-end speech power just 5 dB higher than the echo, double talk is more accurately detected with about 10 percents improvements. However, the networks are also badly affected by the low near-end speech power, which is also known as a big challenge in conventional methods. Similar trends are observed in relative to SNR, though the fluctuations are smaller. In the RT test, it is found that the networks are tolerable to small changes in the echo path. When the changes become bigger, the mismatch in the echo learning network and the classifier begins to add, which lowers the accuracies.
+
+In the last test, we increase the variability in the data of class $H_0$, considering no-double-talk data is more easily obtained in reality. Several different echo paths are incorporated while the total amount of training data is unchanged. The three networks are retrained and the results are given in the last row. The multi-condition training setup alleviates the problem of data mismatch. Bnet here reports better results than the other two, which again supports the arguments in subsection 3.3.
 
 %Finally, an test example is given in Fig.~\ref{fig6}.
 %\begin{figure}[t!]
@@ -213,13 +218,13 @@ Seen from the results, the trained networks favor easier tasks as indicated by h
 
 \section{Conclusion}
 
-In deep learning applications, a structured design is known beneficial to the final performance. In this paper, a separate echo learning net is combined with the DNN based classifier for the double talk detection problem. The echo learning net partially handles the nonlinearity in the system and collaborates with the classifier. The networks outperform conventional methods and they are shown robust to small changes in the environment. Future work includes multi-condition training and performance evaluation in AEC.
+In deep learning applications, a structured design is known beneficial to the final performance. In this paper, a separate echo learning net is combined with the DNN based classifier for the double talk detection problem. The echo learning net partially handles the nonlinearity in the system and collaborates with the classifier. The proposed networks outperform the conventional NCC method and they are shown robust to small changes in the environment. Future work may include network joint training and performance evaluation in AEC.
 
 %\newpage
 
 \section{Acknowledgements}
 
-This work is supported by the China Scholarship Council (No. 201604910623). Experiments presented in this paper were carried out using the Grid'5000 testbed, supported by a scientific interest group hosted by Inria and including CNRS, RENATER and several Universities as well as other organizations (see $https://www.grid5000.fr$).
+This work is supported by the China Scholarship Council (No. 201604910623). 
 
 
 \bibliographystyle{IEEEtran}
