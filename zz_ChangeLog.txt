@@ -71,11 +71,8 @@ chime_data.py
 ########################  以上可以正确运行 ##################################
 
 
-
-关于测试车载数据：
-
-nn_models.py 与
-fgnt\chainer_extensions\sequence_linear.py
+extention: 补充了几个 beamformer
+matlab_test: 离线测试pmwf
 
  
 
