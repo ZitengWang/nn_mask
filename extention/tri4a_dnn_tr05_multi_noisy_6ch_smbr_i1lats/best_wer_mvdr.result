@@ -1,0 +1,7 @@
+./local/chime4_calc_wers_smbr.sh exp/tri4a_dnn_tr05_multi_noisy_6ch_smbr_i1lats mvdr exp/tri4a_dnn_tr05_multi_noisy_6ch/graph_tgpr_5k
+compute WER for each location
+
+-------------------
+best overall dt05 WER % (language model weight = 10)
+ (Number of iterations = 2)
+-------------------

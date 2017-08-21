@@ -1,0 +1,15 @@
+./local/chime4_calc_wers_smbr.sh exp/tri4a_dnn_tr05_multi_noisy_6ch_smbr_i1lats r1mwf_0 exp/tri4a_dnn_tr05_multi_noisy_6ch/graph_tgpr_5k
+compute WER for each location
+
+-------------------
+best overall dt05 WER 5.50% (language model weight = 12)
+ (Number of iterations = 4)
+-------------------
+dt05_simu WER: 5.18% (Average), 4.75% (BUS), 6.08% (CAFE), 4.66% (PEDESTRIAN), 5.22% (STREET)
+-------------------
+dt05_real WER: 5.83% (Average), 7.70% (BUS), 5.38% (CAFE), 4.59% (PEDESTRIAN), 5.65% (STREET)
+-------------------
+et05_simu WER: 5.79% (Average), 4.99% (BUS), 6.31% (CAFE), 5.73% (PEDESTRIAN), 6.11% (STREET)
+-------------------
+et05_real WER: 9.54% (Average), 14.45% (BUS), 8.40% (CAFE), 7.38% (PEDESTRIAN), 7.94% (STREET)
+-------------------
