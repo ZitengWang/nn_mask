@@ -11,13 +11,13 @@ from chainer import optimizers
 from chainer import serializers
 from tqdm import tqdm
 
-#from chime_data import prepare_training_data
+from chime_data import prepare_training_data
 from fgnt.utils import Timer
 from fgnt.utils import mkdir_p
 from nn_models import BLSTMMaskEstimator
 from nn_models import SimpleFWMaskEstimator
 
-parser = argparse.ArgumentParser(description='NN GEV training')
+parser = argparse.ArgumentParser(description='NN training')
 parser.add_argument('data_dir', help='Directory used for the training data '
                                      'and to store the model file.')
 parser.add_argument('model_type',
@@ -60,21 +60,27 @@ if args.chime_dir != '':
 #    prepare_training_data(args.chime_dir, args.data_dir)
 
 flists = dict()
-for stage in ['tr', 'dt', 'dt_robot']:
+for stage in ['tr', 'dt']:
     with open(
             os.path.join(args.data_dir, 'flist_{}.json'.format(stage))) as fid:
         flists[stage] = json.load(fid)
+
+from chime_data import gen_part_flist_simu
+# get data from specific env
+#flists = dict()
+#flists['tr'] = gen_part_flist_simu(args.chime_dir,'tr','BUS',ext=True)
+#flists['dt'] = gen_part_flist_simu(args.chime_dir,'dt','BUS',ext=True)
 log.debug('Loaded file lists')
 
 # Prepare model
 if args.model_type == 'BLSTM':
     model = BLSTMMaskEstimator()
     model_save_dir = os.path.join(args.data_dir, 'BLSTM_model')
-#    mkdir_p(model_save_dir)
+ #   mkdir_p(model_save_dir)
 elif args.model_type == 'FW':
     model = SimpleFWMaskEstimator()
     model_save_dir = os.path.join(args.data_dir, 'FW_model')
-#    mkdir_p(model_save_dir)
+ #   mkdir_p(model_save_dir)
 else:
     raise ValueError('Unknown model type. Possible are "BLSTM" and "FW"')
 
@@ -109,7 +115,6 @@ def _create_batch(file, volatile=False):
     return IBM_X, IBM_N, Y
 
 
-flists['tr_new'] = flists['tr']+flists['dt_robot']
 # Learning loop
 epoch = 0
 exhausted = False
@@ -121,14 +126,14 @@ while (epoch < args.max_epochs and not exhausted):
     ))
 
     # training
-    perm = np.random.permutation(len(flists['tr_new']))
+    perm = np.random.permutation(len(flists['tr']))
     sum_loss_tr = 0
     t_io = 0
     t_fw = 0
     t_bw = 0
-    for i in tqdm(perm, desc='Training epoch {}'.format(epoch), miniters=8000):
+    for i in tqdm(perm, desc='Training epoch {}'.format(epoch), miniters=1000):
         with Timer() as t:
-            IBM_X, IBM_N, Y = _create_batch(flists['tr_new'][i])
+            IBM_X, IBM_N, Y = _create_batch(flists['tr'][i])
         t_io += t.msecs
 
         model.zerograds()
@@ -146,12 +151,12 @@ while (epoch < args.max_epochs and not exhausted):
     # cross-validation
     sum_loss_cv = 0
     for i in tqdm(range(len(flists['dt'])),
-                  desc='Cross-validation epoch {}'.format(epoch), miniters=1600):
+                  desc='Cross-validation epoch {}'.format(epoch), miniters=1000):
         IBM_X, IBM_N, Y = _create_batch(flists['dt'][i], volatile=True)
         loss = model.train_and_cv(Y, IBM_N, IBM_X, 0.)
         sum_loss_cv += float(loss.data)
 
-    loss_tr = sum_loss_tr / len(flists['tr_new'])
+    loss_tr = sum_loss_tr / len(flists['tr'])
     loss_cv = sum_loss_cv / len(flists['dt'])
 
     log.info(

@@ -23,19 +23,17 @@ function CHiME3_simulate_data(official)
 % This software is distributed under the terms of the GNU Public License
 % version 3 (http://www.gnu.org/licenses/gpl.txt)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-warning('off','all')
-warning
 
 if nargin < 1,
     official=true;
 end
 
 addpath ../utils;
-upath='/talc/multispeech/corpus/speech_recognition/CHiME3/data/audio/16kHz/isolated//'; % path to segmented utterances
-upath_ext = '/talc/multispeech/calcul/users/zwang/Data/CHiME3/isolated_ext_chime_dt//';
-cpath='/talc/multispeech/corpus/speech_recognition/CHiME3/data/audio/16kHz/embedded//'; % path to continuous recordings
-bpath='/talc/multispeech/corpus/speech_recognition/CHiME3/data/audio/16kHz/backgrounds//'; % path to noise backgrounds
-apath='/talc/multispeech/corpus/speech_recognition/CHiME3/data/annotations//'; % path to JSON annotations
+upath='../../data/audio/16kHz/isolated/'; % path to segmented utterances
+upath_ext = '../../data/audio/16kHz/isolated_ext/';
+cpath='../../data/audio/16kHz/embedded/'; % path to continuous recordings
+bpath='../../data/audio/16kHz/backgrounds/'; % path to noise backgrounds
+apath='../../data/annotations/'; % path to JSON annotations
 nchan=6;
 
 % Define hyper-parameters
@@ -154,7 +152,7 @@ else
     end
     mat2json(mat,[apath 'tr05_simu_new.json']);
 end
-if 0
+
 % Loop over utterances
 for utt_ind=1:length(mat),
     if official,
@@ -190,20 +188,20 @@ for utt_ind=1:length(mat),
 		ysimu(:,c)=o;
     end
     
-    SNR = normrnd(5, 5)   %dB
-    SNR = 10^(SNR/10);
+    SNR = normrnd(5, 5); %dB
+	SNR = 10^(SNR/10);
     % Normalize level and add
     ysimu=sqrt(SNR/sum(sum(x.^2))*sum(sum(n.^2)))*ysimu;
     xsimu=ysimu+n;
     
     % Write WAV file
     for c=1:nchan,
-   %     wavwrite(xsimu(:,c),fs,[udir uname '.CH' int2str(c) '.wav']);
+        wavwrite(xsimu(:,c),fs,[udir uname '.CH' int2str(c) '.wav']);
         audiowrite([udir_ext uname '.CH' int2str(c) '.Noise.wav'],n(:, c),fs);
         audiowrite([udir_ext uname '.CH' int2str(c) '.Clean.wav'],ysimu(:, c), fs);
     end
 end
-end
+
 %% Create simulated development and test datasets from booth recordings %%
 sets={'dt05'};
 for set_ind=1:length(sets),
@@ -239,7 +237,7 @@ for set_ind=1:length(sets),
     end
     
     % Loop over utterances
-    for utt_ind=1590:length(mat),
+    for utt_ind=1:length(mat),
         if official,
             udir=[upath set '_' lower(mat{utt_ind}.environment) '_simu/'];
             udir_ext=[upath_ext 'dt05_' lower(mat{utt_ind}.environment) '_simu/'];
@@ -264,10 +262,10 @@ for set_ind=1:length(sets),
         nsampl=length(r);
         x=zeros(nsampl,nchan);
 		
-        ysimu = zeros(nsampl, nchan);
+		ysimu = zeros(nsampl, nchan);
         for c=1:nchan,
             x(:,c)=wavread([cpath nname '.CH' int2str(c) '.wav'],[tbeg tend]);
-	    ysimu(:,c)=o;
+			ysimu(:,c)=o;
         end
         
         % Compute the STFT (short window)
@@ -280,7 +278,9 @@ for set_ind=1:length(sets),
         % Filter and subtract close-mic speech
         Y=apply_ir(A,R,del);
         y=istft_multi(Y,nsampl).';
-        level=sum(sum(y.^2))
+        level=sum(sum(y.^2));
+		
+		% just change the noise source here and the level range !
         n=x-y;
         
         
@@ -291,9 +291,9 @@ for set_ind=1:length(sets),
         
         % Write WAV file
         for c=1:nchan,
-        %    wavwrite(xsimu(:,c),fs,[udir uname '.CH' int2str(c) '.wav']);
+            wavwrite(xsimu(:,c),fs,[udir uname '.CH' int2str(c) '.wav']);
             audiowrite([udir_ext uname '.CH' int2str(c) '.Noise.wav'],n(:, c),fs);
-            audiowrite([udir_ext uname '.CH' int2str(c) '.Clean.wav'],ysimu(:, c), fs);
+        	audiowrite([udir_ext uname '.CH' int2str(c) '.Clean.wav'],ysimu(:, c), fs);
         end
     end
 end

@@ -123,13 +123,14 @@ def stft(time_signal, time_dim=None, size=1024, shift=256,
     """
     if time_dim is None:
         time_dim = np.argmax(time_signal.shape)
-	'''
+
+    '''
     # Pad with zeros to have enough samples for the window function to fade.
     if fading:
         pad = [(0, 0)] * time_signal.ndim
         pad[time_dim] = [size - shift, size - shift]
         time_signal = np.pad(time_signal, pad, mode='constant')
-	'''
+    '''
     # Pad with trailing zeros, to have an integral number of frames.
     frames = _samples_to_stft_frames(time_signal.shape[time_dim], size, shift)
     samples = _stft_frames_to_samples(frames, size, shift)
@@ -189,7 +190,8 @@ def istft(stft_signal, signal_len, size=1024, shift=256,
 
     for j, i in enumerate(range(0, len(time_signal) - size + shift, shift)):
         time_signal[i:i + size] += window * np.real(irfft(stft_signal[j]))
-	time_signal = time_signal[0:signal_len]
+
+    time_signal = time_signal[0:signal_len]    
     # Compensate fade-in and fade-out
     #if fading:
     #    time_signal = time_signal[

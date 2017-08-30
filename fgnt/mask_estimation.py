@@ -2,11 +2,11 @@ import numpy as np
 
 
 def _voiced_unvoiced_split_characteristic(number_of_frequency_bins):
-    split_bin = 60
-    transition_width = 30
-    fast_transition_width = 4
-    low_bin = 3
-    high_bin = 125
+    split_bin = 200
+    transition_width = 99
+    fast_transition_width = 5
+    low_bin = 4
+    high_bin = 500
 
     a = np.arange(0, transition_width)
     a = np.pi / (transition_width - 1) * a
@@ -131,12 +131,12 @@ def quantile_mask(observations, quantile_fraction=0.98, quantile_weight=0.999):
 
 
 def estimate_IBM(X, N,
-                 threshold_unvoiced_speech=3,
-                 threshold_voiced_speech=-3,
+                 threshold_unvoiced_speech=5,
+                 threshold_voiced_speech=0,
                  threshold_unvoiced_noise=-10,
                  threshold_voiced_noise=-10,
-                 low_cut=3,
-                 high_cut=125):
+                 low_cut=5,
+                 high_cut=500):
     """Estimate an ideal binary mask given the speech and noise spectrum.
 
     :param X: speech signal in STFT domain with shape (frames, frequency-bins)
@@ -169,18 +169,25 @@ def estimate_IBM(X, N,
     xPSD_threshold_new = xPSD / c_new
 
     nPSD = N * N.conjugate()
-
-    speechMask = (xPSD_threshold > nPSD)
     
-    avg_xPSD = np.average(xPSD)
-    speechMask = np.logical_and(speechMask, (xPSD_threshold > 0.05*avg_xPSD))
+    # Binary Mask
+    #speechMask = (xPSD_threshold > nPSD)
+    #speechMask = np.logical_and(speechMask, (xPSD_threshold > 0.005))  
+    # PSM    
+    speechMask = np.real(X/(X+N))    
+    speechMask[speechMask<0] = 0
+    speechMask[speechMask>1] = 1 
+    #
     speechMask[..., 0:low_cut - 1] = 0
     speechMask[..., high_cut:len(speechMask[0,0])] = 0
 
     noiseMask = (xPSD_threshold_new < nPSD)
 
-    noiseMask = np.logical_or(noiseMask, (xPSD_threshold_new < 0.10*avg_xPSD))
+    noiseMask = np.logical_or(noiseMask, (xPSD_threshold_new < 0.005))
     noiseMask[..., 0: low_cut - 1] = 1
     noiseMask[..., high_cut: len(noiseMask[0,0])] = 1
 
     return (speechMask, noiseMask)
+
+
+    

@@ -50,8 +50,7 @@ class SequenceLinearFunction(function.Function):
 
     def check_type_forward(self, in_types):
         type_check.expect(in_types.size() >= 2)
-        x_type = in_types[0]
-        W = in_types[1]
+        x_type, W = in_types
 
         type_check.expect(
                 x_type.dtype == numpy.float32,

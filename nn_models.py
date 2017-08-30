@@ -25,10 +25,10 @@ class MaskEstimator(Chain):
 class BLSTMMaskEstimator(MaskEstimator):
     def __init__(self):
         blstm_layer = SequenceBLSTM(513, 256, normalized=True)
-        relu_1 = SequenceLinear(256, 513, normalized=True)
-        relu_2 = SequenceLinear(513, 513, normalized=True)
-        noise_mask_estimate = SequenceLinear(513, 513, normalized=True)
-        speech_mask_estimate = SequenceLinear(513, 513, normalized=True)
+        relu_1 = SequenceLinear(256, 512, normalized=True)
+        relu_2 = SequenceLinear(512, 512, normalized=True)
+        noise_mask_estimate = SequenceLinear(512, 513, normalized=True)
+        speech_mask_estimate = SequenceLinear(512, 513, normalized=True)
 
         super(BLSTMMaskEstimator, self).__init__(
                 blstm_layer=blstm_layer,
@@ -49,24 +49,18 @@ class BLSTMMaskEstimator(MaskEstimator):
 
 class SimpleFWMaskEstimator(MaskEstimator):
     def __init__(self):
-        relu_1 = SequenceLinear(129, 512, normalized=False)
-        relu_2 = SequenceLinear(512, 512, normalized=False)
-        relu_3 = SequenceLinear(512, 512, normalized=False)
-        noise_mask_estimate = SequenceLinear(512, 129, normalized=False)
-        speech_mask_estimate = SequenceLinear(512, 129, normalized=False)
+        relu_1 = SequenceLinear(513, 1024, normalized=True)
+        noise_mask_estimate = SequenceLinear(1024, 513, normalized=True)
+        speech_mask_estimate = SequenceLinear(1024, 513, normalized=True)
 
         super(SimpleFWMaskEstimator, self).__init__(
                 relu_1=relu_1,
-                relu_2=relu_2,
-                relu_3=relu_3,
                 noise_mask_estimate=noise_mask_estimate,
                 speech_mask_estimate=speech_mask_estimate
         )
 
     def _propagate(self, Y, dropout=0.):
         relu_1 = F.clipped_relu(self.relu_1(Y, dropout=dropout))
-        relu_2 = F.clipped_relu(self.relu_2(relu_1, dropout=dropout))
-        relu_3 = F.clipped_relu(self.relu_3(relu_2, dropout=dropout))
-        N_mask = F.sigmoid(self.noise_mask_estimate(relu_3))
-        X_mask = F.sigmoid(self.speech_mask_estimate(relu_3))
+        N_mask = F.sigmoid(self.noise_mask_estimate(relu_1))
+        X_mask = F.sigmoid(self.speech_mask_estimate(relu_1))
         return N_mask, X_mask

@@ -11,13 +11,13 @@ import string
 from chime_data import gen_flist_simu, \
     gen_flist_real, get_audio_data, get_audio_data_with_context, \
     get_audio_data_after_corr_check
-from fgnt.beamforming import gev_wrapper_on_masks, mcmf_wrapper_on_masks
+from fgnt.beamforming import gev_wrapper_on_masks
 from fgnt.signal_processing import audiowrite, stft, istft
 from fgnt.utils import Timer
 from fgnt.utils import mkdir_p
 from nn_models import BLSTMMaskEstimator, SimpleFWMaskEstimator
 
-parser = argparse.ArgumentParser(description='NN GEV beamforming')
+parser = argparse.ArgumentParser(description='NN beamforming')
 parser.add_argument('flist',
                     help='Name of the flist to process (e.g. tr05_simu)')
 parser.add_argument('chime_dir',
@@ -47,11 +47,8 @@ if args.gpu >= 0:
     model.to_gpu()
 xp = np if args.gpu < 0 else cuda.cupy
 
-test_flist = 'dt05_simu'
-stage = test_flist[:2]
-scenario = test_flist.split('_')[-1]
-#stage = args.flist[:2]
-#scenario = args.flist.split('_')[-1]
+stage = args.flist[:2]
+scenario = args.flist.split('_')[-1]
 
 # CHiME data handling
 if scenario == 'simu':
@@ -60,13 +57,13 @@ elif scenario == 'real':
     flist = gen_flist_real(args.chime_dir, stage)
 else:
     raise ValueError('Unknown flist {}'.format(args.flist))
-'''
+
 for env in ['caf', 'bus', 'str', 'ped']:
     mkdir_p(os.path.join(args.output_dir, '{}05_{}_{}'.format(
             stage, env, scenario
     )))
-'''
-# get the correlation coefficients
+
+# get the correlation coefficients for reference channel selection
 with open('mic_error') as a_file:
     xcorr=dict()
     for a_line in a_file:
@@ -83,23 +80,17 @@ output_setup = {}
 # output types: gev; mvdr; sdw-mwf; r1-mwf; vs 
 output_setup['output_type'] = 'r1-mwf'
 output_setup['gev_ban'] = False
-output_setup['mwf_mu'] = 'rnn'   # a scalar value or 'rnn'
+output_setup['mwf_mu'] = 1  # trade-off parameter: a scalar value or 'rnn'
 output_setup['r1-mwf_evd'] = False
-output_setup['r1-mwf_gevd'] = False
-output_setup['expand_frames'] = 2
-#outfile_postfix = '_mcmv'+str(output_setup['expand_frames'])+'_vs_med'
-outfile_postfix = '_r1mwf'
+output_setup['r1-mwf_gevd'] = True
+outfile_postfix = ''
+
         
 t_io = 0
 t_net = 0
 t_beamform = 0
-num = 0
-
 # Beamform loop
 for cur_line in tqdm(flist, miniters=1000):
-    num += 1
-    if num > 1:
-        break
     with Timer() as t:
         if scenario == 'simu':
             audio_data = get_audio_data(cur_line)
@@ -130,22 +121,18 @@ for cur_line in tqdm(flist, miniters=1000):
         data_tmp=X_masks.data
         N_mask = np.median(N_masks.data, axis=1)
         X_mask = np.median(X_masks.data, axis=1)
-        Y_hat = gev_wrapper_on_masks(Y, N_mask, X_mask, output_setup, corr_info)
-
-        #N_mask = N_masks.data
-        #X_mask = X_masks.data               
-        #Y_hat = mcmf_wrapper_on_masks(Y, N_mask, X_mask, output_setup, corr_info)
+        Y_hat = gev_wrapper_on_masks(Y, N_mask, X_mask, output_setup, corr=corr_info)
     t_beamform += t.msecs
 
     # the spliter in Win '\' and Linux '/'
     if scenario == 'simu':
-        wsj_name = cur_line.split('\\')[-1].split('_')[1]
-        spk = cur_line.split('\\')[-1].split('_')[0]
-        env = cur_line.split('\\')[-1].split('_')[-1]
+        wsj_name = cur_line.split('/')[-1].split('_')[1]
+        spk = cur_line.split('/')[-1].split('_')[0]
+        env = cur_line.split('/')[-1].split('_')[-1]
     elif scenario == 'real':
         wsj_name = cur_line[3]
-        spk = cur_line[0].split('\\')[-1].split('_')[0]
-        env = cur_line[0].split('\\')[-1].split('_')[-1]
+        spk = cur_line[0].split('/')[-1].split('_')[0]
+        env = cur_line[0].split('/')[-1].split('_')[-1]
 
     filename = os.path.join(
             args.output_dir,
@@ -154,13 +141,13 @@ for cur_line in tqdm(flist, miniters=1000):
     )
 
     audiowrite(istft(Y_hat, audio_data.shape[1])[context_samples:], filename[:-4]+outfile_postfix+'.wav', 16000, True, True)
-'''
+    '''
     # direct apply the mask on the DS
     Y_ds_hat = np.sum(Y, axis=1) * X_mask
     audiowrite(istft(Y_ds_hat, audio_data.shape[1])[context_samples:], filename[:-4]+'_X.wav', 16000, True, True)
     Y_ds_hat = np.sum(Y, axis=1) * X_mask/(X_mask+N_mask)
     audiowrite(istft(Y_ds_hat, audio_data.shape[1])[context_samples:], filename[:-4]+'_W.wav', 16000, True, True)
-'''
+    '''
 print('Finished')
 print('Timings: I/O: {:.2f}s | Net: {:.2f}s | Beamformer: {:.2f}s'.format(
         t_io / 1000, t_net / 1000, t_beamform / 1000
