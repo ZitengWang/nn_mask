@@ -1,9 +1,15 @@
 forked from https://github.com/fgnt/nn-gev 
 
+#
+
 extentions: beamformers used to generated the results in [Rank-1 Constrained Multichannel Wiener Filter for Speech Recognition in Noisy Environments](https://arxiv.org/abs/1707.00201)
+
+#
 
 Recognition results of the proposed r1MWF-\mu_G-gevd, see RESULTS for all
 
+# 
+ 
 ./local/chime4_calc_wers_smbr.sh exp/tri4a_dnn_tr05_multi_noisy_smbr_i1lats r1mwf_rnn_gevd exp/tri4a_dnn_tr05_multi_noisy/graph_tgpr_5k
 compute WER for each location
 
@@ -35,6 +41,7 @@ et05_simu WER: 4.68% (Average), 3.75% (BUS), 5.29% (CAFE), 4.76% (PEDESTRIAN), 4
 et05_real WER: 6.03% (Average), 8.00% (BUS), 5.66% (CAFE), 5.29% (PEDESTRIAN), 5.16% (STREET)
 
 
+#
 
 On AM trained with all 6 channels
 
