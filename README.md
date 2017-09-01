@@ -1,12 +1,13 @@
-forked from https://github.com/fgnt/nn-gev 
+forked from https://github.com/fgnt/nn-gev , follow the instructions therein for installation 
 
 #
 
-extentions: beamformers used to generated the results in [Rank-1 Constrained Multichannel Wiener Filter for Speech Recognition in Noisy Environments](https://arxiv.org/abs/1707.00201)
+extentions: beamformers (MVDR, GEV, GEV-BAN, Variable Span, SDW-MWF, rank-1 MWF with different constraints ) used in [Rank-1 Constrained Multichannel Wiener Filter for Speech Recognition in Noisy Environments](https://arxiv.org/abs/1707.00201)
 
 #
+#
 
-Recognition results of the proposed r1MWF-\mu_G-gevd, see RESULTS for all
+Recognition results of the proposed r1MWF-\mu_G-gevd, see [RESULTS]() for all
 
 # 
  
@@ -24,6 +25,7 @@ et05_simu WER: 6.84% (Average), 5.85% (BUS), 7.81% (CAFE), 7.08% (PEDESTRIAN), 6
 
 et05_real WER: 8.74% (Average), 11.59% (BUS), 8.76% (CAFE), 7.42% (PEDESTRIAN), 7.21% (STREET)
 
+#
 
 LM rescore
 
@@ -40,7 +42,7 @@ et05_simu WER: 4.68% (Average), 3.75% (BUS), 5.29% (CAFE), 4.76% (PEDESTRIAN), 4
 
 et05_real WER: 6.03% (Average), 8.00% (BUS), 5.66% (CAFE), 5.29% (PEDESTRIAN), 5.16% (STREET)
 
-
+#
 #
 
 On AM trained with all 6 channels
@@ -59,6 +61,7 @@ et05_simu WER: 5.83% (Average), 5.17% (BUS), 6.50% (CAFE), 5.98% (PEDESTRIAN), 5
 
 et05_real WER: 7.71% (Average), 9.95% (BUS), 6.87% (CAFE), 7.14% (PEDESTRIAN), 6.87% (STREET)
 
+#
 
 LM rescore
 
