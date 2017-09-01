@@ -7,7 +7,7 @@ extentions: beamformers (MVDR, GEV, GEV-BAN, Variable Span, SDW-MWF, rank-1 MWF 
 #
 #
 
-Recognition results of the proposed r1MWF-\mu_G-gevd, see [RESULTS]() for all
+Recognition results of the proposed r1MWF-\mu_G-gevd, see [RESULTS](https://github.com/ZitengWang/nn_mask) for all
 
 # 
  
