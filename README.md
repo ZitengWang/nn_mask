@@ -2,7 +2,7 @@ forked from https://github.com/fgnt/nn-gev , follow the instructions therein for
 
 #
 
-extentions: beamformers (MVDR, GEV, GEV-BAN, Variable Span, SDW-MWF, rank-1 MWF with different constraints ) used in [Rank-1 Constrained Multichannel Wiener Filter for Speech Recognition in Noisy Environments](https://arxiv.org/abs/1707.00201)
+extentions: beamformers (MVDR, GEV, GEV-BAN, Variable Span, SDW-MWF, rank-1 MWF with different constraints ) used in [Rank-1 Constrained Multichannel Wiener Filter for Speech Recognition in Noisy Environments](https://arxiv.org/abs/1707.00201) and [ON SDW-MWF AND VARIABLE SPAN LINEAR FILTER WITH APPLICATION TO SPEECH RECOGNITION IN NOISY ENVIRONMENTS] 
 
 #
 #
@@ -41,7 +41,7 @@ Recognition results, see [RESULTS](https://github.com/ZitengWang/nn_mask) for al
     <td>GEV</td>  <td>6.98</td> <td>7.14</td> <td>10.01</td> <td>10.53</td>
   </tr>
   <tr>
-    <td>MWF</td>  <td>-</td> <td>-</td> <td>12.54</td> <td>16.16</td>
+    <td>MWF</td>  <td>10.81</td> <td>12.92</td> <td>12.54</td> <td>16.16</td>
   </tr>
   <tr>
     <td>VS-rank1</td>  <td>4.15</td> <td>7.35</td> <td>6.37</td> <td>10.22</td>
@@ -60,6 +60,17 @@ Recognition results, see [RESULTS](https://github.com/ZitengWang/nn_mask) for al
   </tr>
   <tr>
     <td>r1MWF-\mu_G-gevd</td>  <td>4.68</td> <td>6.03</td> <td>6.87</td> <td>8.74</td>
+  </tr>
+  <tr>
+  </tr>
+   <tr>
+    <td>gevd-SDW-MWF</td>  <td>4.39</td> <td>7.38</td> <td>-</td> <td>-</td>
+  </tr>
+   <tr>
+    <td>gevd-GEV-BAN</td>  <td>4.21</td> <td>6.17</td> <td>-</td> <td>-</td>
+  </tr>
+    <tr>
+    <td>gevd-GEV</td>  <td>4.65</td> <td>5.93</td> <td>-</td> <td>-</td>
   </tr>
 </table>
 
