@@ -119,30 +119,7 @@ def apply_r1_mwf(mix, target_psd_matrix, noise_psd_matrix, mu=1, corr=None,
     """
     bins, sensors, frames = mix.shape
     
-    # EVD and GEVD reconstructs the target matrix to be rank-1 
-    if evd is True:
-        evd_vector = np.empty((bins, sensors), dtype=np.complex)   
-        for f in range(bins): 
-            evd_vector[f,:] = get_pca_vector(target_psd_matrix[f,:,:])                       
-            b0 = evd_vector[f,:][:,np.newaxis] 
-            b1 = evd_vector[f,:][np.newaxis,:]
-            tmp = np.dot(b0, b1.conj())
-            tr1 = np.trace(target_psd_matrix[f,:,:])
-            tr2 = np.trace(tmp)
-            target_psd_matrix[f,:,:] = tmp*tr1/tr2
-    elif gevd is True:  
-        gevd_vals, gevd_matrix = get_gevd_vals_vecs(target_psd_matrix, noise_psd_matrix)   
-        for f in range(bins):
-            gsvd_matrix = inv(gevd_matrix[f,:,:]) 
-            # attention: gevd_matrix is invertable theoritically
-            # no direct way to compute gsvd in python
-            gsvd_vector = gsvd_matrix.conj().T[:,np.argmax(gevd_vals[f,:])]
-            b0 = gsvd_vector[:,np.newaxis] 
-            b1 = gsvd_vector[np.newaxis,:]
-            tmp = np.dot(b0, b1.conj())
-            tr1 = np.trace(target_psd_matrix[f,:,:])
-            tr2 = np.trace(tmp)
-            target_psd_matrix[f,:,:] = tmp*tr1/tr2
+    # EVD and GEVD reconstructs the target matrix to be rank-1, moved to upper level warpper 
     
     eig_values, _ = get_gevd_vals_vecs(target_psd_matrix, noise_psd_matrix)
     lamda = np.sum(eig_values, axis=1)  # np.max ? np.sum
@@ -169,7 +146,7 @@ def apply_r1_mwf(mix, target_psd_matrix, noise_psd_matrix, mu=1, corr=None,
     return np.einsum('...a,...at->...t', mwf_vector.conj(), mix)
 
     
-def apply_vs_filter(mix, target_psd_matrix, noise_psd_matrix, mu=1, corr=None, frm_exp=1):
+def apply_vs_filter(mix, target_psd_matrix, noise_psd_matrix, mu=1, corr=None, Qrank=1, frm_exp=1):
     """
     Apply variable span filter: h = sum_q ( b*b^H / (mu+lamda) )*Xpsd*e1
     :param mix: the signal complex FFT
@@ -189,7 +166,6 @@ def apply_vs_filter(mix, target_psd_matrix, noise_psd_matrix, mu=1, corr=None, f
         ref_ch=np.argmax(corr)
     ref_vector[ref_ch,0]=1 
     
-    Qrank = 1
     #rnn=1
     vs_vector = np.zeros((bins, sensors), dtype=np.complex)  
     eig_values, eig_vectors = get_gevd_vals_vecs(target_psd_matrix, noise_psd_matrix)
@@ -298,8 +274,32 @@ def gev_wrapper_on_masks(mix, noise_mask=None, target_mask=None,
     else:
         output_type = setup['output_type']
         mu = setup['mwf_mu']
-        
     bins, sensors, _ = target_psd_matrix.shape
+    if setup['evd'] is True:
+        evd_vector = np.empty((bins, sensors), dtype=np.complex)
+        for f in range(bins):
+            evd_vector[f,:] = get_pca_vector(target_psd_matrix[f,:,:])
+            b0 = evd_vector[f,:][:,np.newaxis]
+            b1 = evd_vector[f,:][np.newaxis,:]
+            tmp = np.dot(b0, b1.conj())
+            tr1 = np.trace(target_psd_matrix[f,:,:])
+            tr2 = np.trace(tmp)
+            target_psd_matrix[f,:,:] = tmp*tr1/tr2
+    elif setup['gevd'] is True:
+        gevd_vals, gevd_matrix = get_gevd_vals_vecs(target_psd_matrix, noise_psd_matrix)
+        for f in range(bins):
+            gsvd_matrix = inv(gevd_matrix[f,:,:])
+            # attention: gevd_matrix is invertable theoritically
+            # no direct way to compute gsvd in python
+            gsvd_vector = gsvd_matrix.conj().T[:,np.argmax(gevd_vals[f,:])]
+            b0 = gsvd_vector[:,np.newaxis]
+            b1 = gsvd_vector[np.newaxis,:]
+            tmp = np.dot(b0, b1.conj())
+            tr1 = np.trace(target_psd_matrix[f,:,:])
+            tr2 = np.trace(tmp)
+            target_psd_matrix[f,:,:] = tmp*tr1/tr2
+        
+    #bins, sensors, _ = target_psd_matrix.shape
     if output_type == 'gev':
 		# the priciple eigenvector of (noise_psd_matrix)^-1*(target_psd_matrix)
         W_gev = get_gev_vector(target_psd_matrix, noise_psd_matrix)
@@ -326,13 +326,12 @@ def gev_wrapper_on_masks(mix, noise_mask=None, target_mask=None,
 		# rank-1 MWF with options: EVD and GEVD 
 		# ref: on optimal frequency-domain MWF for noise reduction
 		#      low-rank approximation based MWF for noise reduction ...
-        output = apply_r1_mwf(mix, target_psd_matrix, noise_psd_matrix, mu, corr,
-                              evd=setup['r1-mwf_evd'], gevd=setup['r1-mwf_gevd'])
+        output = apply_r1_mwf(mix, target_psd_matrix, noise_psd_matrix, mu, corr)
     
     if output_type == 'vs':
 		# variable span linear filter
 		# ref: noise reduction with optimal variable span linear filters
-		output = apply_vs_filter(mix, target_psd_matrix, noise_psd_matrix, mu, corr)
+		output = apply_vs_filter(mix, target_psd_matrix, noise_psd_matrix, mu, corr, setup['vs_Qrank'])
     
     return output.T
                             

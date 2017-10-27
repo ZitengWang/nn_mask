@@ -134,11 +134,11 @@ def get_audio_data_with_context(embedded_template, t_start, t_end,
     audio_data = audio_data.astype(np.float32)
     return audio_data, context_samples
 
-def get_audio_data_after_corr_check(embedded_template, t_start, t_end, xcorr,
-                                ch_range=range(1, 7)):
+def get_audio_data_after_corr_check(embedded_template, t_start, t_end, xcorr):
     threshold = 0.2
+    ch_range=range(1,7)
     for ind in range(1,7):
-        if xcorr[ind-1]<threshold:
+        if xcorr[ind-1] < threshold:
             ch_range.remove(ind)
     # check failure, return ch_range
     start_context = max((t_start - 5), 0)
@@ -164,9 +164,18 @@ def prepare_training_data(chime_data_dir, dest_dir):
             N = stft(noise_audio, time_dim=1).transpose((1, 0, 2))
             IBM_X, IBM_N = estimate_IBM(X, N)
             Y_abs = np.abs(X + N)
+            X_abs = np.abs(X)
+            N_abs = np.abs(N)
+            PSX_abs = np.real(X/(X+N))
+            PSN_abs = np.real(N/(X+N))         
+  # add the clean speech spectrum and phase sensitive spectrum
             export_dict = {
                 'IBM_X': IBM_X.astype(np.float32),
                 'IBM_N': IBM_N.astype(np.float32),
+                'X_abs': X_abs.astype(np.float32),
+                'N_abs': N_abs.astype(np.float32),
+                'PSX_abs' : PSX_abs.astype(np.float32),
+                'PSN_abs' : PSN_abs.astype(np.float32),
                 'Y_abs': Y_abs.astype(np.float32)
             }
             export_name = os.path.join(dest_dir, stage, f.split('/')[-1])
@@ -176,3 +185,6 @@ def prepare_training_data(chime_data_dir, dest_dir):
         with open(os.path.join(dest_dir, 'flist_{}.json'.format(stage)),
                   'w') as fid:
             json.dump(export_flist, fid, indent=4)
+
+
+

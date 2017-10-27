@@ -7,6 +7,7 @@ from chainer import cuda
 from chainer import serializers
 from tqdm import tqdm
 import string
+from chainer import using_config
 
 from chime_data import gen_flist_simu, \
     gen_flist_real, get_audio_data, get_audio_data_with_context, \
@@ -78,14 +79,15 @@ with open('mic_error') as a_file:
 
 output_setup = {}
 # output types: gev; mvdr; sdw-mwf; r1-mwf; vs 
-output_setup['output_type'] = 'r1-mwf'
+output_setup['output_type'] = 'sdw-mwf'
 output_setup['gev_ban'] = False
 output_setup['mwf_mu'] = 1  # trade-off parameter: a scalar value or 'rnn'
-output_setup['r1-mwf_evd'] = False
-output_setup['r1-mwf_gevd'] = True
+output_setup['evd'] = False # rank-1 reconstruction or not
+output_setup['gevd'] = True
+output_setup['vs_Qrank'] = 1 # 
 outfile_postfix = ''
 
-        
+ 
 t_io = 0
 t_net = 0
 t_beamform = 0
@@ -108,11 +110,12 @@ for cur_line in tqdm(flist, miniters=1000):
                 cur_line[0], cur_line[1], cur_line[2], xcorr[file_name])
     t_io += t.msecs
     Y = stft(audio_data, time_dim=1).transpose((1, 0, 2))
-    Y_var = Variable(np.abs(Y).astype(np.float32), True)
+    Y_var = Variable(np.abs(Y).astype(np.float32))
     if args.gpu >= 0:
         Y_var.to_gpu(args.gpu)
     with Timer() as t:
-        N_masks, X_masks = model.calc_masks(Y_var)
+        with using_config('train', False): 
+            N_masks, X_masks = model.calc_masks(Y_var)
         N_masks.to_cpu()
         X_masks.to_cpu()
     t_net += t.msecs
