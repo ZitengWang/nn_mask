@@ -119,7 +119,7 @@ def apply_r1_mwf(mix, target_psd_matrix, noise_psd_matrix, mu=1, corr=None,
     """
     bins, sensors, frames = mix.shape
     
-    # EVD and GEVD reconstructs the target matrix to be rank-1 
+    # EVD and GSVD reconstructs the target matrix to be rank-1 
     if evd is True:
         evd_vector = np.empty((bins, sensors), dtype=np.complex)   
         for f in range(bins): 
@@ -134,8 +134,9 @@ def apply_r1_mwf(mix, target_psd_matrix, noise_psd_matrix, mu=1, corr=None,
         gevd_vals, gevd_matrix = get_gevd_vals_vecs(target_psd_matrix, noise_psd_matrix)   
         for f in range(bins):
             gsvd_matrix = inv(gevd_matrix[f,:,:]) 
-            # attention: gevd_matrix is invertable theoritically
-            # no direct way to compute gsvd in python
+            # attention: gevd_matrix is invertable theoritically, no direct way to compute gsvd in python
+            # the reconstruction vector is indeed from the inverse of the GEVD matrix
+	    # see ref: low rank approximation based multichannel Wiener filter algorithms for noise reduction with application in cochlear implants
             gsvd_vector = gsvd_matrix.conj().T[:,np.argmax(gevd_vals[f,:])]
             b0 = gsvd_vector[:,np.newaxis] 
             b1 = gsvd_vector[np.newaxis,:]
