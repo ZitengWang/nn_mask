@@ -289,9 +289,7 @@ def gev_wrapper_on_masks(mix, noise_mask=None, target_mask=None,
         gevd_vals, gevd_matrix = get_gevd_vals_vecs(target_psd_matrix, noise_psd_matrix)
         for f in range(bins):
             gsvd_matrix = inv(gevd_matrix[f,:,:])
-            # attention: gevd_matrix is invertable theoritically, no direct way to compute gsvd in python
-            # the reconstruction vector is indeed from the inverse of the GEVD matrix
-	    # see ref: low rank approximation based multichannel Wiener filter algorithms for noise reduction with application in cochlear implants
+	   # This is the only way we know to compute gsvd in python. (gevd_matrix is invertable theoritically)
             gsvd_vector = gsvd_matrix.conj().T[:,np.argmax(gevd_vals[f,:])]
             b0 = gsvd_vector[:,np.newaxis]
             b1 = gsvd_vector[np.newaxis,:]
@@ -299,7 +297,11 @@ def gev_wrapper_on_masks(mix, noise_mask=None, target_mask=None,
             tr1 = np.trace(target_psd_matrix[f,:,:])
             tr2 = np.trace(tmp)
             target_psd_matrix[f,:,:] = tmp*tr1/tr2
-        
+# attention: the reconstruction vector is indeed from the inverse of the GEVD matrix
+# see ref: low rank approximation based multichannel Wiener filter algorithms for noise reduction with application in cochlear implants
+# Actually, the EVD / GEVD analysis here relates to the definition of 'target steering vector' or relative transfer function. 
+# see ref: PERFORMANCE ANALYSIS OF THE COVARIANCE SUBTRACTION METHOD FOR RELATIVE TRANSFER FUNCTION ESTIMATION AND COMPARISON TO THE COVARIANCE WHITENING METHOD
+
     #bins, sensors, _ = target_psd_matrix.shape
     if output_type == 'gev':
 		# the priciple eigenvector of (noise_psd_matrix)^-1*(target_psd_matrix)
