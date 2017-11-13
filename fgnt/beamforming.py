@@ -289,8 +289,9 @@ def gev_wrapper_on_masks(mix, noise_mask=None, target_mask=None,
         gevd_vals, gevd_matrix = get_gevd_vals_vecs(target_psd_matrix, noise_psd_matrix)
         for f in range(bins):
             gsvd_matrix = inv(gevd_matrix[f,:,:])
-            # attention: gevd_matrix is invertable theoritically
-            # no direct way to compute gsvd in python
+            # attention: gevd_matrix is invertable theoritically, no direct way to compute gsvd in python
+            # the reconstruction vector is indeed from the inverse of the GEVD matrix
+	    # see ref: low rank approximation based multichannel Wiener filter algorithms for noise reduction with application in cochlear implants
             gsvd_vector = gsvd_matrix.conj().T[:,np.argmax(gevd_vals[f,:])]
             b0 = gsvd_vector[:,np.newaxis]
             b1 = gsvd_vector[np.newaxis,:]
@@ -325,7 +326,6 @@ def gev_wrapper_on_masks(mix, noise_mask=None, target_mask=None,
     if output_type == 'r1-mwf':
 		# rank-1 MWF with options: EVD and GEVD 
 		# ref: on optimal frequency-domain MWF for noise reduction
-		#      low-rank approximation based MWF for noise reduction ...
         output = apply_r1_mwf(mix, target_psd_matrix, noise_psd_matrix, mu, corr)
     
     if output_type == 'vs':
