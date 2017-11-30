@@ -171,10 +171,10 @@ def estimate_IBM(X, N,
     nPSD = N * N.conjugate()
     
     # Binary Mask
-    #speechMask = (xPSD_threshold > nPSD)
-    #speechMask = np.logical_and(speechMask, (xPSD_threshold > 0.005))  
+    speechMask = (xPSD_threshold > nPSD)
+    speechMask = np.logical_and(speechMask, (xPSD_threshold > 0.005))  
     # PSM    
-    speechMask = np.real(X/(X+N))    
+    # speechMask = np.real(X/(X+N))    
     speechMask[speechMask<0] = 0
     speechMask[speechMask>1] = 1 
     #
