@@ -2,7 +2,7 @@ forked from https://github.com/fgnt/nn-gev , follow the instructions therein for
 
 #
 
-extentions: beamformers (MVDR, GEV, GEV-BAN, Variable Span, SDW-MWF, rank-1 MWF with different constraints ) used in [Rank-1 Constrained Multichannel Wiener Filter for Speech Recognition in Noisy Environments](https://arxiv.org/abs/1707.00201) and [ON SDW-MWF AND VARIABLE SPAN LINEAR FILTER WITH APPLICATION TO SPEECH RECOGNITION IN NOISY ENVIRONMENTS] 
+extentions: beamformers (MVDR, GEV, GEV-BAN, Variable Span, SDW-MWF, rank-1 MWF with different constraints ) used in [Rank-1 Constrained Multichannel Wiener Filter for Speech Recognition in Noisy Environments](https://www.sciencedirect.com/science/article/pii/S0885230817301584) and [ON SDW-MWF AND VARIABLE SPAN LINEAR FILTER WITH APPLICATION TO SPEECH RECOGNITION IN NOISY ENVIRONMENTS](https://2018.ieeeicassp.org/Papers/ViewPapers.asp?PaperNum=2278) 
 
 #
 #
