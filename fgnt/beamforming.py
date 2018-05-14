@@ -289,8 +289,12 @@ def gev_wrapper_on_masks(mix, noise_mask=None, target_mask=None,
         gevd_vals, gevd_matrix = get_gevd_vals_vecs(target_psd_matrix, noise_psd_matrix)
         for f in range(bins):
             gsvd_matrix = inv(gevd_matrix[f,:,:])
-	   # This is the only way we know to compute gsvd in python. (gevd_matrix is invertable theoritically)
+	   # This is our way to compute gsvd in python. (gevd_matrix is invertable with full-rank speech/noise covariance matrixes)
             gsvd_vector = gsvd_matrix.conj().T[:,np.argmax(gevd_vals[f,:])]
+	
+	    # alternative implementation. The results should be the same, but this works with singular speech covariance matrix. 
+            #gsvd_vector = np.einsum('ij,j->i', noise_psd_matrix[f,:,:], gevd_matrix[f,:,np.argmax(gevd_vals[f,:])])
+	
             b0 = gsvd_vector[:,np.newaxis]
             b1 = gsvd_vector[np.newaxis,:]
             tmp = np.dot(b0, b1.conj())
